@@ -6,16 +6,18 @@ vm_name='arch-ansible'
 iso_path="$1"
 base_path="$(dirname "$(realpath "$0")")"
 
+export LIBVIRT_DEFAULT_URI='qemu:///system'
+
 cd "$base_path"
 
-if ! virsh --connect qemu:///system domstate "$vm_name" >/dev/null 2>&1
+if ! virsh domstate "$vm_name" >/dev/null 2>&1
 then
     if [ -z "$iso_path" ]
     then
         echo 'vm not installed. specify iso file to install vm.'
         exit 1
     else
-        virt-install --connect=qemu:///system \
+        virt-install \
             --name="$vm_name" \
             --memory=8192 \
             --vcpus=4 \
