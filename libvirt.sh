@@ -22,8 +22,8 @@ then
             --memory=8192 \
             --vcpus=4 \
             --disk='size=20' \
-            --cdrom="$iso_path" \
-            --osinfo='detect=on,require=on' \
+            --disk="$iso_path,device=cdrom,format=iso" \
+            --osinfo='detect=on,name=archlinux' \
             --boot='cdrom,hd' \
             --boot=uefi \
             --network=none \
