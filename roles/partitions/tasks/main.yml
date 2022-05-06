@@ -1,0 +1,45 @@
+# vim: ft=yaml.ansible
+---
+
+- name: 'create partition {{ index + 1 }} on {{ item.device }}'
+  community.general.parted:
+    device: '{{ item.device }}'
+    number: '{{ index + 1 }}'
+    part_start: '{{ item.part_start }}'
+    part_end: '{{ item.part_end }}'
+    fs_type: '{{ item.boot | default(false) | ternary("fat32", item.fs_type) }}'
+    flags: '{{ item.flags | default([]) | union(item.boot | default(false) |
+      ternary(["boot", "esp"], [])) | unique }}'
+    resize: false
+    label: gpt
+    name: '{{ item.label }}'
+    state: present
+  register: parted_result
+
+- name: ensure jq is installed
+  community.general.pacman:
+    name: jq
+    state: present
+
+- name: determine path of partition
+  ansible.builtin.shell:
+    executable: /bin/bash
+    cmd: |
+      set -Eeuo pipefail
+      lsblk -JT -o PATH,PARTLABEL |
+        jq -r '.blockdevices[] | select(.path == "{{ item.device }}").children[] |
+                select(.partlabel == "{{ item.label }}").path'
+  changed_when: false
+  register: partition_path_result
+
+- name: 'format partition {{ index + 1 }} on {{ item.device }}'
+  community.general.filesystem:
+    dev: '{{ partition_path_result.stdout }}'
+    fstype: '{{ (item.boot | default(false) or item.fs_type == "fat32") | ternary("vfat", item.fs_type) }}'
+    opts: '{{ (item.boot | default(false) or item.fs_type == "fat32") | ternary("-n", "-L") }} {{ item.label }}'
+    state: present
+  register: format_result
+
+- name: result
+  ansible.builtin.debug:
+    var: format_result

@@ -1,5 +1,48 @@
-- hosts: all
-  tasks:
-    - name: ping
-      ping:
+# vim: ft=yaml.ansible
+---
 
+- hosts: local
+  tasks:
+    - name: check if we booted to archiso
+      ansible.builtin.fail:
+        msg: not an archiso
+      failed_when: ansible_facts.cmdline.archisobasedir is not defined
+
+    - name: check if system is booted in UEFI mode
+      ansible.builtin.stat:
+        path: /sys/firmware/efi/efivars
+      register: efivars_result
+      failed_when: not (efivars_result.stat.isdir is defined and efivars_result.stat.isdir)
+
+    - name: enable ntp
+      ansible.builtin.shell:
+        executable: /bin/bash
+        cmd: |
+          set -Eeuo pipefail
+          if timedatectl status | grep -Eq 'NTP.+inactive'
+          then
+            timedatectl set-ntp true
+            echo 'set-ntp-success'
+          fi
+      register: set_ntp_result
+      changed_when: '"set-ntp-success" in set_ntp_result.stdout'
+
+    - name: create partitions
+      ansible.builtin.include_role:
+        name: partitions
+      vars:
+        partition: '{{ item }}'
+        index: '{{ index }}'
+      loop: '{{ disk.partitions }}'
+      loop_control:
+        index_var: index
+
+# - hosts: chroot
+#   tasks:
+#     - name: testt
+#       shell: ls /usr/bin | wc -l
+#       register: shell_result
+#     - debug:
+#         var: shell_result.stdout_lines
+#   # roles:
+#   #   - paru
