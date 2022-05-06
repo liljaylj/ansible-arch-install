@@ -36,8 +36,3 @@ then
     fi
 fi
 
-# # gather facts
-# ansible default -m setup -i "$base_path/inventories/libvirt/hosts.yml"
-
-# run install playbook
-ansible-playbook -i "$base_path/inventories/libvirt/hosts.yml" install.yml
