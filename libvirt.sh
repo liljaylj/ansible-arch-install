@@ -10,7 +10,9 @@ export LIBVIRT_DEFAULT_URI='qemu:///system'
 
 cd "$base_path"
 
-if ! virsh domstate "$vm_name" >/dev/null 2>&1
+dom_state="$( (virsh domstate "$vm_name" 2>/dev/null || printf 'undefined') | xargs)"
+
+if [[ "$dom_state" = 'undefined' ]]
 then
     if [ -z "$iso_path" ]
     then
@@ -32,7 +34,14 @@ then
             --sound=default \
             --audio='id=1,type=spice' \
             --events='on_poweroff=destroy,on_reboot=restart,on_crash=destroy' \
-            --autoconsole=graphical
+            --autoconsole=none
     fi
+elif [[ "$dom_state" = 'shut off' ]]
+then
+    virsh start "$vm_name"
 fi
 
+if [[ "$dom_state" = 'running' ]]
+then
+    virt-viewer --auto-resize=always -r arch-ansible
+fi
