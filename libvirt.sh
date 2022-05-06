@@ -36,10 +36,12 @@ then
             --audio='id=1,type=spice' \
             --events='on_poweroff=destroy,on_reboot=restart,on_crash=destroy' \
             --autoconsole=none
+        dom_state='running'
     fi
 elif [[ "$dom_state" = 'shut off' ]]
 then
     virsh start "$vm_name"
+    dom_state='running'
 fi
 
 if [[ "$dom_state" = 'running' ]]
