@@ -27,16 +27,6 @@
       register: set_ntp_result
       changed_when: '"set-ntp-success" in set_ntp_result.stdout'
 
-    - name: create partitions
-      ansible.builtin.include_role:
-        name: partitions
-      vars:
-        partition: '{{ item }}'
-        index: '{{ index }}'
-      loop: '{{ disk.partitions }}'
-      loop_control:
-        index_var: index
-
 # - hosts: chroot
 #   tasks:
 #     - name: testt

@@ -65,17 +65,23 @@ Press "e" in systemd-boot menu and add these kernel parameters:
 
 ### Update mirrorlist
 
-```
+```shell
 reflector -c KZ, -p http --completion-percent 99 -f 5 --save /etc/pacman.d/mirrorlist
 ```
 
-### Install ansible
+### Install ansible and archinstall
 
 ```shell
-pacman -Sy ansible
+pacman --noconfirm -Sy archinstall ansible
 ```
 
-### Run ansible playbook
+### Create disk layout and mount
+
+```shell
+archinstall --script only_hd
+```
+
+### Install arch
 
 ```shell
 ansible-playbook -K -i local install.yml
