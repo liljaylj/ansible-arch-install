@@ -27,6 +27,25 @@
       register: set_ntp_result
       changed_when: '"set-ntp-success" in set_ntp_result.stdout'
 
+    - name: enable multilib
+      ansible.builtin.ini_file:
+        path: /etc/pacman.conf
+        section: multilib
+        option: Include
+        value: /etc/pacman.d/mirrorlist
+        mode: '0644'
+      when: archinstall.multilib | default(false)
+
+    - name: update pacman mirrorlist
+      ansible.builtin.command:
+        cmd: 'reflector {{ archinstall.reflector.args | default("@/etc/xdg/reflector/reflector.conf") }}'
+      changed_when: false
+      when: archinstall.reflector is defined and archinstall.reflector
+
+    - name: sync package databases
+      ansible.builtin.pacman:
+        update_cache: true
+
 # - hosts: chroot
 #   tasks:
 #     - name: testt
