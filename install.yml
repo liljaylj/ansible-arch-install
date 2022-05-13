@@ -46,6 +46,20 @@
       ansible.builtin.pacman:
         update_cache: true
 
+    - name: pacstrap
+      vars:
+        base_packages:
+          - base
+          - base-devel
+          - linux-firmware
+          - efibootmgr
+          - '{{ archinstall.btrfs | default(false) | ternary("btrfs-progs", None) }}'
+          - '{{ archinstall.swap | default(true) | ternary("zram-generator", None) }}'
+      ansible.builtin.command:
+        argv: '{{ ["pacstrap", archinstall.target] | union(base_packages) |
+          union(ansible_facts.processor | microcode_packages) }}'
+        creates: '{{ [ archinstall.target, "usr/bin/bash" ] | path_join }}'
+
 # - hosts: chroot
 #   tasks:
 #     - name: testt
