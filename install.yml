@@ -65,14 +65,31 @@
       ansible.builtin.command:
         argv: '{{ ["pacstrap", archinstall.target] | union(base_packages) |
           union(ansible_facts.processor | microcode_packages) }}'
-        creates: '{{ [ archinstall.target, "usr/bin/bash" ] | path_join }}'
+        creates: '{{ [archinstall.target, "usr/bin/bash"] | path_join }}'
 
-# - hosts: chroot
-#   tasks:
-#     - name: testt
-#       shell: ls /usr/bin | wc -l
-#       register: shell_result
-#     - debug:
-#         var: shell_result.stdout_lines
-#   # roles:
-#   #   - paru
+- hosts: chroot
+  tasks:
+    - name: 'set time zone to {{ archinstall.timezone }}'
+      ansible.builtin.file:
+        src: '{{ ["/usr/share/zoneinfo", archinstall.timezone] | path_join }}'
+        dest: '/etc/localtime'
+        state: link
+
+    - name: adjust clock to hardware clock
+      ansible.builtin.command:
+        cmd: 'hwclock --systohc'
+        creates: '/etc/adjtime'
+
+    - name: set locales
+      ansible.builtin.copy:
+        content: "{{ archinstall.locales | default(['en_US.UTF-8 UTF-8']) | join('\n') }}\n"
+        dest: '/etc/locale.gen'
+        mode: '0644'
+
+    - name: set locale lang
+      ansible.builtin.copy:
+        content: "LANG={{ archinstall.locales | default(['en_US.UTF-8 UTF-8']) | first | trim | split | first }}\n"
+        dest: '/etc/locale.conf'
+        mode: '0644'
+
+  #   - paru
