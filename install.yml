@@ -33,7 +33,7 @@
         section: multilib
         option: Include
         value: /etc/pacman.d/mirrorlist
-        mode: '0644'
+        mode: '644'
       when: archinstall.multilib | default(false)
 
     - name: get mirrorlist file stat
@@ -84,7 +84,7 @@
       ansible.builtin.copy:
         content: "{{ archinstall.locales | default(['en_US.UTF-8 UTF-8']) | join('\n') }}\n"
         dest: '/etc/locale.gen'
-        mode: '0644'
+        mode: '644'
 
     - name: locale gen
       ansible.builtin.command:
@@ -95,6 +95,6 @@
       ansible.builtin.copy:
         content: "LANG={{ archinstall.locales | default(['en_US.UTF-8 UTF-8']) | first | trim | split | first }}\n"
         dest: '/etc/locale.conf'
-        mode: '0644'
+        mode: '644'
 
   #   - paru
