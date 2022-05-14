@@ -55,7 +55,7 @@
 
     - name: pacstrap
       vars:
-        base_packages:
+        packages:
           - base
           - base-devel
           - linux-firmware
@@ -63,7 +63,8 @@
           - '{{ archinstall.btrfs | default(false) | ternary("btrfs-progs", None) }}'
           - '{{ archinstall.swap | default(true) | ternary("zram-generator", None) }}'
       ansible.builtin.command:
-        argv: '{{ ["pacstrap", archinstall.target] | union(base_packages) |
+        argv: '{{ ["pacstrap", archinstall.target] | union(packages) |
+          union(archinstall.pacstrap_packages | default([])) |
           union(ansible_facts.processor | microcode_packages) }}'
         creates: '{{ [archinstall.target, "usr/bin/bash"] | path_join }}'
 
