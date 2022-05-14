@@ -36,11 +36,18 @@
         mode: '0644'
       when: archinstall.multilib | default(false)
 
+    - name: get mirrorlist file stat
+      ansible.builtin.stat:
+        path: /etc/pacman.d/mirrorlist
+      register:
+        pacman_mirrorlist_stat
+
     - name: update pacman mirrorlist
       ansible.builtin.command:
         cmd: 'reflector {{ archinstall.reflector.args | default("@/etc/xdg/reflector/reflector.conf") }}'
       changed_when: false
-      when: archinstall.reflector is defined and archinstall.reflector
+      when: 'archinstall.reflector is defined and archinstall.reflector and (ansible_facts.date_time.epoch | float -
+        pacman_mirrorlist_stat.stat.mtime > archinstall.reflector.timeout_secs | default(300))'
 
     - name: sync package databases
       ansible.builtin.pacman:
