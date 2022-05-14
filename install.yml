@@ -100,4 +100,21 @@
         create: true
         mode: '644'
 
+    - name: set vconsole keyboard layout
+      ansible.builtin.lineinfile:
+        regexp: '^ *KEYMAP='
+        line: 'KEYMAP={{ archinstall.vconsole.keymap | default("us") }}'
+        dest: '/etc/vconsole.conf'
+        create: true
+        mode: '644'
+
+    - name: set vconsole font
+      ansible.builtin.lineinfile:
+        regexp: '^ *FONT='
+        line: 'FONT={{ archinstall.vconsole.font }}'
+        dest: '/etc/vconsole.conf'
+        create: true
+        mode: '644'
+      when: archinstall.vconsole.font is defined
+
   #   - paru
