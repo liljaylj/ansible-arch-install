@@ -86,6 +86,11 @@
         dest: '/etc/locale.gen'
         mode: '0644'
 
+    - name: locale gen
+      ansible.builtin.command:
+        cmd: 'locale-gen'
+        creates: '/usr/lib/locale/locale-archive'
+
     - name: set locale lang
       ansible.builtin.copy:
         content: "LANG={{ archinstall.locales | default(['en_US.UTF-8 UTF-8']) | first | trim | split | first }}\n"
