@@ -93,9 +93,11 @@
         creates: '/usr/lib/locale/locale-archive'
 
     - name: set locale lang
-      ansible.builtin.copy:
-        content: "LANG={{ archinstall.locales | default(['en_US.UTF-8 UTF-8']) | first | trim | split | first }}\n"
+      ansible.builtin.lineinfile:
+        regexp: '^ *LANG='
+        line: "LANG={{ archinstall.locales | default(['en_US.UTF-8 UTF-8']) | first | trim | split | first }}\n"
         dest: '/etc/locale.conf'
+        create: true
         mode: '644'
 
   #   - paru
