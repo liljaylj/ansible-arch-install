@@ -119,4 +119,10 @@
         mode: '644'
       when: archinstall.vconsole.font is defined
 
+    - name: define hostname
+      ansible.builtin.copy:
+        content: "{{ archinstall.hostname }}\n"
+        dest: '/etc/hostname'
+        mode: '644'
+
   #   - paru
