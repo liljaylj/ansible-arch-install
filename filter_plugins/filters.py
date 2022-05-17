@@ -8,6 +8,7 @@ class FilterModule(object):
                 self.to_kernel_list,
                 self.default_kernel,
                 self.microcode_packages,
+                self.kernel_packages,
             ])
 
     def _is_install_kernel(self, state):
@@ -40,6 +41,9 @@ class FilterModule(object):
         if not kernel_list:
             raise ValueError('must define at least one kernel')
         return kernel_list
+
+    def kernel_packages(self, kernel_list):
+        return [k if k == 'linux' else f'linux-{k}' for k in kernel_list]
 
     def default_kernel(self, kernels):
         if isinstance(kernels, dict):

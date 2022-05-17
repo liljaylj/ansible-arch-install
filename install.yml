@@ -65,6 +65,7 @@
       ansible.builtin.command:
         argv: '{{ ["pacstrap", archinstall.target] | union(packages) |
           union(archinstall.pacstrap_packages | default([])) |
+          union(archinstall.kernels | to_kernel_list | kernel_packages) |
           union(ansible_facts.processor | microcode_packages) }}'
         creates: '{{ [archinstall.target, "usr/bin/bash"] | path_join }}'
 
