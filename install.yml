@@ -57,6 +57,7 @@
       vars:
         packages:
           - base
+          - iptables-nft
           - base-devel
           - linux-firmware
           - efibootmgr
