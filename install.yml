@@ -125,4 +125,9 @@
         dest: '/etc/hostname'
         mode: '644'
 
+    - name: enable periodic trim
+      ansible.builtin.systemd:
+        name: fstrim.timer
+        enabled: true
+
   #   - paru
