@@ -7,8 +7,8 @@ class FilterModule(object):
         return dict((f.__name__, f) for f in [
                 self.to_kernel_list,
                 self.default_kernel,
-                self.microcode_packages,
-                self.kernel_packages,
+                self.microcode_package,
+                self.kernel_package,
             ])
 
     def _is_install_kernel(self, state):
@@ -42,9 +42,6 @@ class FilterModule(object):
             raise ValueError('must define at least one kernel')
         return kernel_list
 
-    def kernel_packages(self, kernel_list):
-        return [k if k == 'linux' else f'linux-{k}' for k in kernel_list]
-
     def default_kernel(self, kernels):
         if isinstance(kernels, dict):
             for k in self.SUPPORTED_KERNELS:
@@ -53,11 +50,18 @@ class FilterModule(object):
                     return k
         return self.to_kernel_list(kernels)[0]
 
-    def microcode_packages(self, cpus):
-        pkgs = set()
+    def microcode_package(self, cpus):
         for cpu in cpus:
             if cpu == 'GenuineIntel':
-                pkgs.add('intel-ucode')
+                return 'intel-ucode'
             elif cpu == 'AuthenticAMD':
-                pkgs.add('amd-ucode')
-        return list(pkgs)
+                return 'amd-ucode'
+        raise ValueError(f'unsupported CPU manufacturer {cpus}')
+
+    def kernel_package(self, kernel):
+        if not isinstance(kernel, str):
+            raise ValueError('kernel name should be of type str')
+        kernel = kernel.lower()
+        if kernel not in self.SUPPORTED_KERNELS:
+            raise ValueError(f'kernel "{kernel}" is not supported')
+        return kernel if kernel == 'linux' else f'linux-{kernel}'
