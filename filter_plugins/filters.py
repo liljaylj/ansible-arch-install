@@ -31,11 +31,11 @@ class FilterModule(object):
             kernels = [k.strip() for k in kernels.split(',')]
         kernel_list = []
         if isinstance(kernels, list) or isinstance(kernels, set):
-            for f in kernels:
-                if not isinstance(f, str) or f not in self.SUPPORTED_KERNELS:
+            for k in kernels:
+                if not isinstance(k, str) or k.lower() not in self.SUPPORTED_KERNELS:
                     raise ValueError('{} => {} not in {}'
-                            .format(kernels, f, ', '.join(self.SUPPORTED_KERNELS)))
-                kernel_list.append(f)
+                            .format(kernels, k, ', '.join(self.SUPPORTED_KERNELS)))
+                kernel_list.append(k)
         else:
             raise ValueError(f'{kernels} is wrong type')
         if not kernel_list:
