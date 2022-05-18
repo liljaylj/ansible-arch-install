@@ -220,6 +220,12 @@
         dest: '/boot/loader/loader.conf'
         mode: '755'
 
+    - name: enable networkmanager service
+      ansible.builtin.systemd:
+        name: 'NetworkManager.service'
+        daemon_reload: true
+        enabled: true
+
   handlers:
 
     - name: run mkinitcpio
