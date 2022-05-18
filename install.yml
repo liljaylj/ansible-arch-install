@@ -178,6 +178,21 @@
       notify:
         - run mkinitcpio
 
+    - name: zram swap
+      ansible.builtin.ini_file:
+        dest: '/etc/systemd/zram-generator.conf'
+        section: 'zram0'
+        allow_no_value: true
+        mode: '644'
+      when: archinstall.swap | default(true)
+
+    - name: zram swap service
+      ansible.builtin.systemd:
+        name: 'systemd-zram-setup@zram0.service'
+        daemon_reload: true
+        enabled: true
+      when: archinstall.swap | default(true)
+
   handlers:
 
     - name: run mkinitcpio
