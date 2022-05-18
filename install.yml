@@ -226,6 +226,20 @@
         daemon_reload: true
         enabled: true
 
+    - name: ansible system user
+      ansible.builtin.user:
+        name: ansible
+        system: true
+        home: /tmp/ansible
+        shell: /usr/bin/nologin
+
+    - name: add ansible user to sudoers
+      community.general.sudoers:
+        name: ansible
+        user: ansible
+        nopassword: true
+        commands: ALL
+
   handlers:
 
     - name: run mkinitcpio
