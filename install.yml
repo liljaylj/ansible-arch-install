@@ -193,6 +193,33 @@
         enabled: true
       when: archinstall.swap | default(true)
 
+    - name: install systemd-boot
+      ansible.builtin.command:
+        cmd: 'bootctl --path=/boot install'
+        creates: '/boot/EFI/systemd/systemd-bootx64.efi'
+
+    - name: add bootloader entries
+      ansible.builtin.template:
+        src: 'templates/loader-entry.conf.j2'
+        dest: '/boot/loader/entries/{{ item | kernel_package }}.conf'
+        mode: '755'
+      loop: '{{ archinstall.kernels | to_kernel_list }}'
+
+    - name: add bootloader fallback entries
+      ansible.builtin.template:
+        src: 'templates/loader-entry.conf.j2'
+        dest: '/boot/loader/entries/{{ item | kernel_package }}-fallback.conf'
+        mode: '755'
+      vars:
+        fallback_entry: true
+      loop: '{{ archinstall.kernels | to_kernel_list }}'
+
+    - name: bootloader config
+      ansible.builtin.template:
+        src: 'templates/loader.conf.j2'
+        dest: '/boot/loader/loader.conf'
+        mode: '755'
+
   handlers:
 
     - name: run mkinitcpio

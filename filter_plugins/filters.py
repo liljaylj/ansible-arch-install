@@ -9,6 +9,7 @@ class FilterModule(object):
                 self.default_kernel,
                 self.microcode_package,
                 self.kernel_package,
+                self.kernel_title,
             ])
 
     def _is_install_kernel(self, state):
@@ -44,10 +45,10 @@ class FilterModule(object):
 
     def default_kernel(self, kernels):
         if isinstance(kernels, dict):
-            for k in self.SUPPORTED_KERNELS:
-                v = kernels.get(k)
+            for k, v in kernels.items():
                 if isinstance(v, str) and v.lower() == 'default':
-                    return k
+                    if k.lower() in self.SUPPORTED_KERNELS:
+                        return k
         return self.to_kernel_list(kernels)[0]
 
     def microcode_package(self, cpus):
@@ -65,3 +66,11 @@ class FilterModule(object):
         if kernel not in self.SUPPORTED_KERNELS:
             raise ValueError(f'kernel "{kernel}" is not supported')
         return kernel if kernel == 'linux' else f'linux-{kernel}'
+
+    def kernel_title(self, kernel):
+        if not isinstance(kernel, str):
+            raise ValueError('kernel name should be of type str')
+        kernel = kernel.lower()
+        if kernel not in self.SUPPORTED_KERNELS:
+            raise ValueError(f'kernel "{kernel}" is not supported')
+        return 'Arch Linux' if kernel == 'linux' else f'Arch Linux ({kernel})'
