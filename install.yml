@@ -231,8 +231,9 @@
       ansible.builtin.user:
         name: ansible
         system: true
-        home: /tmp/ansible
         shell: /usr/bin/nologin
+        home: /tmp/ansible
+        create_home: false
 
     - name: add ansible user to sudoers
       community.general.sudoers:
