@@ -262,10 +262,21 @@
         system: '{{ item.system | default(false) }}'
       loop: '{{ archinstall.users | default([]) }}'
 
+    - name: 'install aur helper - {{ archinstall.aur_helper.name }}'
+      become: true
+      become_user: ansible
+      ansible.builtin.shell:
+        executable: '/usr/bin/bash'
+        cmd: |
+          set -Eeuo pipefail
+          git clone https://aur.archlinux.org/{{ archinstall.aur_helper.package }}.git \
+            /tmp/{{ archinstall.aur_helper.package }}
+          cd /tmp/{{ archinstall.aur_helper.package }}
+          makepkg -si --noconfirm
+        creates: '/usr/bin/{{ archinstall.aur_helper.name }}'
+
   handlers:
 
     - name: run mkinitcpio
       ansible.builtin.command:
         cmd: 'mkinitcpio -P'
-
-  #   - paru
