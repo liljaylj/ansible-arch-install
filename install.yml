@@ -242,6 +242,14 @@
         nopassword: true
         commands: ALL
 
+    - name: add wheel group to sudoers
+      community.general.sudoers:
+        name: wheel
+        group: wheel
+        nopassword: false
+        runas: 'ALL:ALL'
+        commands: ALL
+
   handlers:
 
     - name: run mkinitcpio
