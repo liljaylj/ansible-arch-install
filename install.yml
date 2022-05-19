@@ -62,6 +62,7 @@
           - base-devel
           - linux-firmware
           - efibootmgr
+          - networkmanager
           - '{{ archinstall.btrfs | default(false) | ternary("btrfs-progs", None) }}'
           - '{{ archinstall.swap | default(true) | ternary("zram-generator", None) }}'
       ansible.builtin.command:
