@@ -1,0 +1,6 @@
+title	{{ item | kernel_title }}{{ ' Fallback' if fallback_entry | default(false) else '' }}
+linux	/vmlinuz-{{ item | kernel_package }}
+initrd	/{{ ansible_facts.processor | microcode_package }}.img
+initrd	/initramfs-{{ item | kernel_package }}{% if fallback_entry | default(false) %}-fallback{% endif %}.img
+options	root={{ archinstall.bootloader.part_selector }}{% if archinstall.bootloader.subvol_selector is defined %} rootflags={{ archinstall.bootloader.subvol_selector }}{% endif %} rw rootfstype={{ archinstall.bootloader.fstype }}{% if archinstall.swap | default(true) %} zswap.enabled=0{% endif %}{% if archinstall.bootloader.kernel_params is defined %} {{ [archinstall.bootloader.kernel_params] | flatten | join(' ') }}{% endif %}
+

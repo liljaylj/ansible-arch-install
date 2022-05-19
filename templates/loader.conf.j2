@@ -1,0 +1,3 @@
+default {{ archinstall.kernels | default_kernel | kernel_package }}
+editor {{ archinstall.bootloader.editor | default(false) | int }}
+timeout {{ archinstall.bootloader.timeout | default(0) | int }}
