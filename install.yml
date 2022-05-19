@@ -250,6 +250,18 @@
         runas: 'ALL:ALL'
         commands: ALL
 
+    - name: add users
+      ansible.builtin.user:
+        name: '{{ item.name | mandatory }}'
+        comment: '{{ item.comment | default(omit) }}'
+        create_home: '{{ item.create_home | default(true) }}'
+        home: '{{ item.home | default(omit) }}'
+        groups: '{{ item.groups | default(omit) }}'
+        password: '{{ item.password | mandatory }}'
+        shell: '{{ item.shell | default(omit) }}'
+        system: '{{ item.system | default(false) }}'
+      loop: '{{ archinstall.users | default([]) }}'
+
   handlers:
 
     - name: run mkinitcpio
