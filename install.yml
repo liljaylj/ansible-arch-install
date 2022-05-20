@@ -58,18 +58,18 @@
       vars:
         packages:
           - base
-          - iptables-nft
           - base-devel
+          - iptables-nft
           - linux-firmware
           - efibootmgr
           - networkmanager
+          - polkit
           - '{{ archinstall.btrfs | default(false) | ternary("btrfs-progs", None) }}'
           - '{{ archinstall.swap | default(true) | ternary("zram-generator", None) }}'
       ansible.builtin.command:
         argv: '{{ ["pacstrap", archinstall.target] | union(packages) |
           union(archinstall.kernels | to_kernel_list | map("kernel_package")) |
           union([archinstall.pacstrap_packages] | flatten | default([])) |
-          union([ansible_facts.processor | microcode_package]) }}'
         creates: '{{ [archinstall.target, "usr/bin/bash"] | path_join }}'
 
 - hosts: chroot
@@ -126,6 +126,20 @@
         content: "{{ archinstall.hostname }}\n"
         dest: '/etc/hostname'
         mode: '644'
+
+    - name: add hostname to hosts file
+      ansible.builtin.lineinfile:
+        regexp: '{{ item.regexp }}'
+        line: '{{ item.line }}'
+        dest: '/etc/hosts'
+        mode: '644'
+      with_items:
+        - regexp: '^127\.0\.0\.1\s+localhost$'
+          line: '127.0.0.1      localhost'
+        - regexp: '^::1\s+localhost$'
+          line: '::1            localhost'
+        - regexp: '^127\.0\.1\.1\s+{{ archinstall.hostname }}\.localdomain\s+{{ archinstall.hostname }}$'
+          line: '127.0.1.1      {{ archinstall.hostname }}.localdomain      {{ archinstall.hostname }}'
 
     - name: enable periodic trim
       ansible.builtin.systemd:
@@ -227,21 +241,6 @@
         daemon_reload: true
         enabled: true
 
-    - name: ansible system user
-      ansible.builtin.user:
-        name: ansible
-        system: true
-        shell: /usr/bin/nologin
-        home: /tmp/ansible
-        create_home: false
-
-    - name: add ansible user to sudoers
-      community.general.sudoers:
-        name: ansible
-        user: ansible
-        nopassword: true
-        commands: ALL
-
     - name: add wheel group to sudoers
       community.general.sudoers:
         name: wheel
@@ -261,19 +260,6 @@
         shell: '{{ item.shell | default(omit) }}'
         system: '{{ item.system | default(false) }}'
       loop: '{{ archinstall.users | default([]) }}'
-
-    - name: 'install aur helper - {{ archinstall.aur_helper.name }}'
-      become: true
-      become_user: ansible
-      ansible.builtin.shell:
-        executable: '/usr/bin/bash'
-        cmd: |
-          set -Eeuo pipefail
-          git clone https://aur.archlinux.org/{{ archinstall.aur_helper.package }}.git \
-            /tmp/{{ archinstall.aur_helper.package }}
-          cd /tmp/{{ archinstall.aur_helper.package }}
-          makepkg -si --noconfirm
-        creates: '/usr/bin/{{ archinstall.aur_helper.name }}'
 
   handlers:
 
