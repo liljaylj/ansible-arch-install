@@ -69,7 +69,7 @@
       ansible.builtin.command:
         argv: '{{ ["pacstrap", archinstall.target] | union(packages) |
           union(archinstall.kernels | to_kernel_list | map("kernel_package")) |
-          union([archinstall.pacstrap_packages] | flatten | default([]))'
+          union([archinstall.pacstrap_packages] | flatten | default([])) }}'
         creates: '{{ [archinstall.target, "usr/bin/bash"] | path_join }}'
 
 - hosts: chroot
