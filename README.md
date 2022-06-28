@@ -84,7 +84,7 @@ archinstall --script only_hd
 ### Install arch
 
 ```shell
-ansible-playbook -i local install.yml -e 'part_selector=PARTUUID=<root partition uuid>' --ask-vault-pass
+ansible-playbook -i hosts.yml install.yml -e 'part_selector=PARTUUID=<root partition uuid>' --ask-vault-pass
 ```
 
 > You can get PARTUUID of root partition by running `lsblk -no path,partuuid`
