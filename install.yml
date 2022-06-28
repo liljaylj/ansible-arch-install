@@ -64,6 +64,7 @@
           - efibootmgr
           - networkmanager
           - polkit
+          - grub  # TODO: depend on variable
           - '{{ archinstall.btrfs | default(false) | ternary("btrfs-progs", None) }}'
           - '{{ archinstall.swap | default(true) | ternary("zram-generator", None) }}'
       ansible.builtin.command:
@@ -152,8 +153,8 @@
         line: 'MODULES=({{ [archinstall.mkinitcpio.modules | default("")] | flatten | join(" ") }})'
         dest: '/etc/mkinitcpio.conf'
         mode: '644'
-      notify:
-        - run mkinitcpio
+      # notify:
+      #   - run mkinitcpio
 
     - name: set up mkinitcpio binaries
       ansible.builtin.lineinfile:
@@ -161,8 +162,8 @@
         line: 'BINARIES=({{ [archinstall.mkinitcpio.binaries | default("")] | flatten | join(" ") }})'
         dest: '/etc/mkinitcpio.conf'
         mode: '644'
-      notify:
-        - run mkinitcpio
+      # notify:
+      #   - run mkinitcpio
 
     - name: set up mkinitcpio files
       ansible.builtin.lineinfile:
@@ -170,8 +171,8 @@
         line: 'FILES=({{ [archinstall.mkinitcpio.files | default("")] | flatten | join(" ") }})'
         dest: '/etc/mkinitcpio.conf'
         mode: '644'
-      notify:
-        - run mkinitcpio
+      # notify:
+      #   - run mkinitcpio
 
     - name: set up mkinitcpio hooks
       ansible.builtin.lineinfile:
@@ -181,8 +182,8 @@
           flatten | join(" ") }})'
         dest: '/etc/mkinitcpio.conf'
         mode: '644'
-      notify:
-        - run mkinitcpio
+      # notify:
+      #   - run mkinitcpio
 
     - name: set up mkinitcpio compression
       ansible.builtin.lineinfile:
@@ -190,8 +191,8 @@
         line: 'COMPRESSION="{{ archinstall.mkinitcpio.compression | default("zstd") }}"'
         dest: '/etc/mkinitcpio.conf'
         mode: '644'
-      notify:
-        - run mkinitcpio
+      # notify:
+      #   - run mkinitcpio
 
     - name: zram swap
       ansible.builtin.ini_file:
@@ -208,32 +209,49 @@
         enabled: true
       when: archinstall.swap | default(true)
 
-    - name: install systemd-boot
+    # TODO: depend on variable
+    - name: run mkinitcpio
       ansible.builtin.command:
-        cmd: 'bootctl --path=/boot install'
-        creates: '/boot/EFI/systemd/systemd-bootx64.efi'
+        cmd: 'mkinitcpio -P'
+      changed_when: false
 
-    - name: add bootloader entries
-      ansible.builtin.template:
-        src: 'templates/loader-entry.conf.j2'
-        dest: '/boot/loader/entries/{{ item | kernel_package }}.conf'
-        mode: '755'
-      loop: '{{ archinstall.kernels | to_kernel_list }}'
+    - name: install grub efi application
+      ansible.builtin.command:
+        cmd: 'grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB'
+        creates: '/boot/grub/x86_64-efi/'
 
-    - name: add bootloader fallback entries
-      ansible.builtin.template:
-        src: 'templates/loader-entry.conf.j2'
-        dest: '/boot/loader/entries/{{ item | kernel_package }}-fallback.conf'
-        mode: '755'
-      vars:
-        fallback_entry: true
-      loop: '{{ archinstall.kernels | to_kernel_list }}'
+    - name: generate grub configuration file
+      ansible.builtin.command:
+        cmd: 'grub-mkconfig -o /boot/grub/grub.cfg'
+      changed_when: false
 
-    - name: bootloader config
-      ansible.builtin.template:
-        src: 'templates/loader.conf.j2'
-        dest: '/boot/loader/loader.conf'
-        mode: '755'
+    # TODO: depend on variable
+    # - name: install systemd-boot
+    #   ansible.builtin.command:
+    #     cmd: 'bootctl --path=/boot install'
+    #     creates: '/boot/EFI/systemd/systemd-bootx64.efi'
+    #
+    # - name: add bootloader entries
+    #   ansible.builtin.template:
+    #     src: 'templates/loader-entry.conf.j2'
+    #     dest: '/boot/loader/entries/{{ item | kernel_package }}.conf'
+    #     mode: '755'
+    #   loop: '{{ archinstall.kernels | to_kernel_list }}'
+    #
+    # - name: add bootloader fallback entries
+    #   ansible.builtin.template:
+    #     src: 'templates/loader-entry.conf.j2'
+    #     dest: '/boot/loader/entries/{{ item | kernel_package }}-fallback.conf'
+    #     mode: '755'
+    #   vars:
+    #     fallback_entry: true
+    #   loop: '{{ archinstall.kernels | to_kernel_list }}'
+    #
+    # - name: bootloader config
+    #   ansible.builtin.template:
+    #     src: 'templates/loader.conf.j2'
+    #     dest: '/boot/loader/loader.conf'
+    #     mode: '755'
 
     - name: enable networkmanager service
       ansible.builtin.systemd:
@@ -261,8 +279,8 @@
         system: '{{ item.system | default(false) }}'
       loop: '{{ archinstall.users | default([]) }}'
 
-  handlers:
-
-    - name: run mkinitcpio
-      ansible.builtin.command:
-        cmd: 'mkinitcpio -P'
+  # handlers:
+  #
+  #   - name: run mkinitcpio
+  #     ansible.builtin.command:
+  #       cmd: 'mkinitcpio -P'
