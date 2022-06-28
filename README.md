@@ -75,10 +75,22 @@ reflector -c KZ, -p http --completion-percent 99 -f 5 --save /etc/pacman.d/mirro
 pacman --noconfirm -Sy archinstall ansible
 ```
 
+#### To be able copy/paste from terminal scrollback install tmux
+
+```shell
+pacman --noconfirm -S tmux
+```
+
 ### Create disk layout and mount
 
 ```shell
 archinstall --script only_hd
+```
+
+### Find PARTUUID of target disk
+
+```shell
+lsblk -o MOUNTPOINTS,PARTUUID
 ```
 
 ### Install arch
@@ -95,4 +107,16 @@ ansible-playbook -i hosts.yml install.yml -e 'part_selector=PARTUUID=<root parti
 
 ```shell
 set -o vi
+```
+
+### Remove filesystem on disks
+
+```shell
+wipefs -a <block device path>
+```
+
+### Remove partitions
+
+```shell
+parted <root block device path> rm <partition number>
 ```
