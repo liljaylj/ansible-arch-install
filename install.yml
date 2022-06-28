@@ -73,6 +73,11 @@
           union([archinstall.pacstrap_packages] | flatten | default([])) }}'
         creates: '{{ [archinstall.target, "usr/bin/bash"] | path_join }}'
 
+    - name: generate fstab
+      ansible.builtin.command:
+        cmd: 'genfstab -U {{ archinstall.target }} >> {{ archinstall.target }}/etc/fstab'
+      changed_when: false
+
 - hosts: chroot
   tasks:
     - name: 'set time zone to {{ archinstall.timezone }}'
