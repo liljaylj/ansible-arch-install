@@ -1,0 +1,13 @@
+ansible,ansible-core
+base:linux
+btrfs-progs:reiserfsprogs
+glibc:gd
+groff
+grub
+linux-atm
+libnewt
+mkinitcpio
+patch:ed
+pinentry
+reflector
+bash

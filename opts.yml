@@ -1,0 +1,174 @@
+ansible:
+  desc: Official assortment of Ansible collections
+  opts:
+    acme-tiny: openssl_certificate module
+    python-argcomplete: shell completions
+    python-boto3: aws_s3 module
+    python-dnspython: for dig lookup
+    python-keyring: Keyring module
+    python-ldap: LDAP modules
+    python-openstacksdk: OpenStack module
+    python-ovirt-engine-sdk: ovirt support
+    python-proxmoxer: proxmos modules
+    python-pynetbox: NetBox module
+    python-pyopenssl: openssl modules
+ansible-core:
+  desc: Radically simple IT automation platform
+  opts:
+    python-dnspython: for dig lookup
+    python-jmespath: json_query support
+    python-netaddr: for the ipaddr filter
+    python-passlib: crypt values for vars_prompt
+    python-pywinrm: connect to Windows machines
+    python-systemd: log to journal
+    sshpass: for ssh connections with password
+base:
+  desc: Minimal package set to define a basic Arch Linux installation
+  opts:
+    linux: bare metal support
+bash:
+  desc: The GNU Bourne Again shell
+  opts:
+    bash-completion: for tab completion
+binutils:
+  desc: A set of programs to assemble and manipulate binary and object files
+  opts:
+    debuginfod: for debuginfod server/client functionality
+btrfs-progs:
+  desc: Btrfs filesystem utilities
+  opts:
+    reiserfsprogs: btrfs-convert
+gcc:
+  desc: The GNU Compiler Collection - C and C++ frontends
+  opts:
+    lib32-gcc-libs: for generating code for 32-bit ABI
+git:
+  desc: the fast distributed version control system
+  opts:
+    org.freedesktop.secrets: keyring credential helper
+    perl-authen-sasl: git send-email TLS support
+    perl-cgi: gitweb (web interface) support
+    perl-datetime-format-iso8601: git mediawiki support
+    perl-io-socket-ssl: git send-email TLS support
+    perl-libwww: git svn
+    perl-lwp-protocol-https: git mediawiki https support
+    perl-mediawiki-api: git mediawiki support
+    perl-term-readkey: git svn and interactive.singlekey setting
+    subversion: git svn
+    tk: gitk and git gui
+glib2:
+  desc: Low level core library
+  opts:
+    gvfs: most gio functionality
+glibc:
+  desc: GNU C Library
+  opts:
+    gd: for memusagestat
+gnupg:
+  desc: Complete and free implementation of the OpenPGP standard
+  opts:
+    libusb-compat: scdaemon
+    pcsclite: scdaemon
+groff:
+  desc: GNU troff text-formatting system
+  opts:
+    libxaw: for gxditview
+    netpbm: for use together with man -H command interaction in browsers
+    perl-file-homedir: for use with glilypond
+    psutils: for use together with man -H command interaction in browsers
+grub:
+  desc: GNU GRand Unified Bootloader (2)
+  opts:
+    dosfstools: For grub-mkrescue FAT FS and EFI support
+    freetype2: For grub-mkfont usage
+    libisoburn: Provides xorriso for generating grub rescue iso using grub-mkrescue
+    lzop: For grub-mkrescue LZO support
+    mtools: For grub-mkrescue FAT FS support
+    os-prober: To detect other OSes when generating grub.cfg in BIOS systems
+iproute2:
+  desc: IP Routing Utilities
+  opts:
+    linux-atm: ATM support
+libnewt:
+  desc: Not Erik's Windowing Toolkit - text mode windowing with slang
+  opts:
+    tcl: whiptcl support
+libsecret:
+  desc: Library for storing and retrieving passwords and other secrets
+  opts:
+    org.freedesktop.secrets: secret storage backend
+linux-lts:
+  desc: The LTS Linux kernel and modules
+  opts:
+    wireless-regdb: to set the correct wireless channels of your country
+linux-zen:
+  desc: The Linux ZEN kernel and modules
+  opts:
+    wireless-regdb: to set the correct wireless channels of your country
+mkinitcpio:
+  desc: Modular initramfs image creation utility
+  opts:
+    lzop: Use lzo compression for the initramfs image
+    mkinitcpio-nfs-utils: Support for root filesystem on NFS
+neovim:
+  desc: Fork of Vim aiming to improve user experience, plugins, and GUIs
+  opts:
+    python-neovim: for Python 3 plugin support (see :help python)
+    wl-clipboard: for clipboard support on wayland (see :help clipboard)
+    xclip: for clipboard support on X11 (or xsel) (see :help clipboard)
+    xsel: for clipboard support on X11 (or xclip) (see :help clipboard)
+networkmanager:
+  desc: Network connection manager and user applications
+  opts:
+    bluez: Bluetooth support
+    dhclient: alternative DHCP client
+    dhcpcd: alternative DHCP client
+    dnsmasq: connection sharing
+    firewalld: firewall support
+    iptables: connection sharing
+    iwd: wpa_supplicant alternative
+    modemmanager: cellular network support
+    openresolv: alternative resolv.conf manager
+    ppp: dialup connection support
+pacman:
+  desc: A library-based package manager with dependency support
+  opts:
+    perl-locale-gettext: translation support in makepkg-template
+patch:
+  desc: A utility to apply patch files to original sources
+  opts:
+    ed: for patch -e functionality
+pinentry:
+  desc: Collection of simple PIN or passphrase entry dialogs which utilize the Assuan
+    protocol
+  opts:
+    gcr: gnome3 backend
+    gtk2: gtk2 backend
+    qt5-base: qt backend
+python:
+  desc: Next generation of the python high-level scripting language
+  opts:
+    mpdecimal: for decimal
+    python-pip: (null)
+    python-setuptools: (null)
+    tk: for tkinter
+python-jinja:
+  desc: A simple pythonic template language written in Python
+  opts:
+    python-babel: for i18n support
+reflector:
+  desc: A Python 3 module and script to retrieve and filter the latest Pacman mirror
+    list.
+  opts:
+    rsync: rate rsync mirrors
+systemd:
+  desc: system and service manager
+  opts:
+    libfido2: unlocking LUKS2 volumes with FIDO2 token
+    libmicrohttpd: remote journald capabilities
+    quota-tools: kernel-level quota management
+util-linux:
+  desc: Miscellaneous system utilities for Linux
+  opts:
+    words: default dictionary for look
+

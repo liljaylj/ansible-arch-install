@@ -34,26 +34,6 @@ mount -t 9p base_path /src
 cd /src
 ```
 
-### Remove VM
-
-#### Stop VM
-
-```shell
-virsh destroy arch-ansible
-```
-
-#### Delete VM
-
-```shell
-virsh undefine --nvram arch-ansible
-```
-
-#### Delete volume
-
-```shell
-virsh vol-delete --pool default arch-ansible.qcow2
-```
-
 ## Install archlinux
 
 ### Archiso kernel parameters
@@ -85,6 +65,12 @@ pacman --noconfirm -S tmux
 
 ```shell
 archinstall --script only_hd
+```
+
+... or using shell script
+
+```shell
+bash partition.sh
 ```
 
 ### Find PARTUUID of target disk
@@ -119,4 +105,24 @@ wipefs -a <block device path>
 
 ```shell
 parted <root block device path> rm <partition number>
+```
+
+### Remove VM
+
+#### Stop VM
+
+```shell
+virsh destroy arch-ansible
+```
+
+#### Delete VM
+
+```shell
+virsh undefine --nvram arch-ansible
+```
+
+#### Delete volume
+
+```shell
+virsh vol-delete --pool default arch-ansible.qcow2
 ```
