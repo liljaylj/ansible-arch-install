@@ -8,6 +8,7 @@ btrfs_options='defaults,compress=zstd,noatime'
 
 mount -o "$btrfs_options,subvol=@" "$disk_dev$btrfs_suffix" "$mnt_root"
 mkdir -p "$mnt_root"/{boot,.snapshots,home,var/log,var/cache/pacman/pkg,var/lib/libvirt/images}
+chmod 750 "$mnt_root"/.snapshots
 
 mount "$disk_dev$boot_suffix" "$mnt_root"/boot
 
