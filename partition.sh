@@ -15,9 +15,9 @@ mkfs.btrfs -f -L Arch "$disk_dev$btrfs_suffix"
 mount -o "$btrfs_options" "$disk_dev$btrfs_suffix" "$mnt_root"
 
 btrfs subvol create /mnt/@
-btrfs subvol create /mnt/@.snapshots
+btrfs subvol create /mnt/@snapshots
 btrfs subvol create /mnt/@home
-btrfs subvol create /mnt/@log
+btrfs subvol create /mnt/@var_log
 btrfs subvol create /mnt/@pkg
 btrfs subvol create /mnt/@libvirt
 

@@ -11,11 +11,11 @@ mkdir -p "$mnt_root"/{boot,.snapshots,home,var/log,var/cache/pacman/pkg,var/lib/
 
 mount "$disk_dev$boot_suffix" "$mnt_root"/boot
 
-mount -o "$btrfs_options,subvol=@.snapshots" "$disk_dev$btrfs_suffix" "$mnt_root"/.snapshots
+mount -o "$btrfs_options,subvol=@snapshots" "$disk_dev$btrfs_suffix" "$mnt_root"/.snapshots
 chmod 750 "$mnt_root"/.snapshots
 chown :wheel "$mnt_root"/.snapshots
 mount -o "$btrfs_options,subvol=@home" "$disk_dev$btrfs_suffix" "$mnt_root"/home
-mount -o "$btrfs_options,subvol=@log" "$disk_dev$btrfs_suffix" "$mnt_root"/var/log
+mount -o "$btrfs_options,subvol=@var_log" "$disk_dev$btrfs_suffix" "$mnt_root"/var/log
 mount -o "$btrfs_options,subvol=@pkg" "$disk_dev$btrfs_suffix" "$mnt_root"/var/cache/pacman/pkg
 mount -o "$btrfs_options,subvol=@libvirt" "$disk_dev$btrfs_suffix" "$mnt_root"/var/lib/libvirt/images
 
