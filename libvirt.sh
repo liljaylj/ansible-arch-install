@@ -23,7 +23,7 @@ then
             --name="$vm_name" \
             --memory=8192 \
             --vcpus=4 \
-            --disk='size=20' \
+            --disk='size=50' \
             --disk="$iso_path,device=cdrom,format=iso" \
             --filesystem="$base_path,base_path" \
             --osinfo='detect=on,name=archlinux' \
