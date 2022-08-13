@@ -98,11 +98,6 @@
         dest: '/etc/locale.gen'
         mode: '644'
 
-    - name: locale gen
-      ansible.builtin.command:
-        cmd: 'locale-gen'
-        creates: '/usr/lib/locale/locale-archive'
-
     - name: set locale lang
       ansible.builtin.lineinfile:
         regexp: '^ *LANG='
@@ -110,6 +105,11 @@
         dest: '/etc/locale.conf'
         create: true
         mode: '644'
+
+    - name: locale gen
+      ansible.builtin.command:
+        cmd: 'locale-gen'
+        creates: '/usr/lib/locale/locale-archive'
 
     - name: set vconsole keyboard layout
       ansible.builtin.lineinfile:
