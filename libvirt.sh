@@ -29,7 +29,7 @@ then
             --osinfo='detect=on,name=archlinux' \
             --boot='cdrom,hd' \
             --boot=uefi \
-            --network=none \
+            --network='network=default' \
             --qemu-commandline='-netdev user,id=mynet.0,net=10.0.10.0/24,hostfwd=tcp::22222-:22 -device rtl8139,addr=4,netdev=mynet.0' \
             --graphics=spice \
             --sound=default \
