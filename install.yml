@@ -28,27 +28,43 @@
       register: set_ntp_result
       changed_when: '"set-ntp-success" in set_ntp_result.stdout'
 
-    - name: enable multilib
-      ansible.builtin.ini_file:
-        path: /etc/pacman.conf
-        section: multilib
-        option: Include
-        value: /etc/pacman.d/mirrorlist
+    - name: apply mirrorlist
+      ansible.builtin.template:
+        src: 'mirrorlist.j2'
+        dest: '/etc/pacman.d/mirrorlist'
         mode: '644'
-      when: archinstall.multilib | default(false)
 
-    - name: get mirrorlist file stat
-      ansible.builtin.stat:
-        path: /etc/pacman.d/mirrorlist
-      register:
-        pacman_mirrorlist_stat
+    - name: ensure pacman conf.d dir exists
+      ansible.builtin.file:
+        path: '/etc/pacman.d/conf.d'
+        state: directory
+        mode: '755'
 
-    - name: update pacman mirrorlist
-      ansible.builtin.command:
-        cmd: 'reflector {{ archinstall.reflector.args | default("@/etc/xdg/reflector/reflector.conf") }}'
-      changed_when: false
-      when: 'archinstall.reflector is defined and archinstall.reflector and (ansible_facts.date_time.epoch | float -
-        pacman_mirrorlist_stat.stat.mtime > archinstall.reflector.timeout_secs | default(300))'
+    - name: import chaotic pacman key
+      community.general.pacman_key:
+        id: 'A3873AB27021C5DD39E0501AFBA220DFC880C036'
+        keyserver: 'keyserver.ubuntu.com'
+
+    - name: install chaotic mirrorlist and keyring
+      ansible.builtin.pacman:
+        name:
+          - 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
+          - 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+
+    - name: apply pacman conf.d
+      ansible.builtin.template:
+        src: '{{ item }}'
+        dest: '/etc/pacman.d/conf.d/{{ item | splitext | first }}'
+        mode: '644'
+      with_items:
+        - 10-options.conf.j2
+        - 20-multilib.conf.j2
+        - 50-chaotic.conf.j2
+
+    - name: include conf.d to pacman.conf
+      ansible.builtin.lineinfile:
+        path: '/etc/pacman.conf'
+        line: 'Include = /etc/pacman.d/conf.d/*.conf'
 
     - name: sync package databases
       ansible.builtin.pacman:
@@ -65,6 +81,20 @@
           - networkmanager
           - polkit
           - grub  # TODO: depend on variable
+          - terminus-font
+          - man-db
+          - man-pages
+          - ansible
+          - python-pip
+          - git
+          - neovim
+          - zsh
+          - exfat-utils
+          - reflector
+          - tmux
+          - paru
+          - chaotic-keyring
+          - chaotic-mirrorlist
           - '{{ archinstall.btrfs | default(false) | ternary("btrfs-progs", None) }}'
           - '{{ archinstall.swap | default(true) | ternary("zram-generator", None) }}'
       ansible.builtin.command:
@@ -134,67 +164,20 @@
         dest: '/etc/hostname'
         mode: '644'
 
-    - name: add hostname to hosts file
-      ansible.builtin.lineinfile:
-        regexp: '{{ item.regexp }}'
-        line: '{{ item.line }}'
+    - name: apply hosts
+      ansible.builtin.template:
+        src: 'hosts.j2'
         dest: '/etc/hosts'
         mode: '644'
-      with_items:
-        - regexp: '^127\.0\.0\.1\s+localhost$'
-          line: '127.0.0.1      localhost'
-        - regexp: '^::1\s+localhost$'
-          line: '::1            localhost'
-        - regexp: '^127\.0\.1\.1\s+{{ archinstall.hostname }}\.localdomain\s+{{ archinstall.hostname }}$'
-          line: '127.0.1.1      {{ archinstall.hostname }}.localdomain      {{ archinstall.hostname }}'
 
     - name: enable periodic trim
       ansible.builtin.systemd:
         name: fstrim.timer
         enabled: true
 
-    - name: set up mkinitcpio modules
-      ansible.builtin.lineinfile:
-        regexp: '^[#\s]*MODULES='
-        line: 'MODULES=({{ [archinstall.mkinitcpio.modules | default("")] | flatten | join(" ") }})'
-        dest: '/etc/mkinitcpio.conf'
-        mode: '644'
-      notify:
-        - run mkinitcpio
-
-    - name: set up mkinitcpio binaries
-      ansible.builtin.lineinfile:
-        regexp: '^[#\s]*BINARIES='
-        line: 'BINARIES=({{ [archinstall.mkinitcpio.binaries | default("")] | flatten | join(" ") }})'
-        dest: '/etc/mkinitcpio.conf'
-        mode: '644'
-      notify:
-        - run mkinitcpio
-
-    - name: set up mkinitcpio files
-      ansible.builtin.lineinfile:
-        regexp: '^[#\s]*FILES='
-        line: 'FILES=({{ [archinstall.mkinitcpio.files | default("")] | flatten | join(" ") }})'
-        dest: '/etc/mkinitcpio.conf'
-        mode: '644'
-      notify:
-        - run mkinitcpio
-
-    - name: set up mkinitcpio hooks
-      ansible.builtin.lineinfile:
-        regexp: '^[#\s]*HOOKS='
-        line: 'HOOKS=({{ [archinstall.mkinitcpio.hooks |
-          default("base consolefont udev autodetect modconf block filesystems keyboard fsck")] |
-          flatten | join(" ") }})'
-        dest: '/etc/mkinitcpio.conf'
-        mode: '644'
-      notify:
-        - run mkinitcpio
-
-    - name: set up mkinitcpio compression
-      ansible.builtin.lineinfile:
-        regexp: '^[#\s]*COMPRESSION="{{ archinstall.mkinitcpio.compression | default("zstd") }}"'
-        line: 'COMPRESSION="{{ archinstall.mkinitcpio.compression | default("zstd") }}"'
+    - name: apply mkinitcpio.conf
+      ansible.builtin.template:
+        src: 'mkinitcpio.conf.j2'
         dest: '/etc/mkinitcpio.conf'
         mode: '644'
       notify:
