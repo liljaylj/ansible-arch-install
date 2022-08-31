@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/env bash
 
-set -Eeo pipefail
+set -Eexo pipefail
 
 vm_name='arch-ansible'
 iso_path="$1"
@@ -12,22 +12,16 @@ cd "$base_path"
 
 dom_state="$( (virsh domstate "$vm_name" 2>/dev/null || printf 'undefined') | xargs)"
 
-if [[ "$dom_state" = 'undefined' ]]
-then
-    if [ -z "$iso_path" ]
-    then
-        echo 'vm not installed. specify iso file to install vm.'
-        exit 1
-    else
+if [[ -n "$iso_path" ]]; then
+    if [[ "$dom_state" = 'undefined' ]]; then
         virt-install \
             --name="$vm_name" \
             --memory=8192 \
             --vcpus=4 \
             --disk='size=50' \
-            --disk="$iso_path,device=cdrom,format=iso" \
+            --cdrom="$iso_path" \
             --filesystem="$base_path,base_path" \
             --osinfo='detect=on,name=archlinux' \
-            --boot='cdrom,hd' \
             --boot=uefi \
             --network='network=default' \
             --qemu-commandline='-netdev user,id=mynet.0,net=10.0.10.0/24,hostfwd=tcp::22222-:22 -device rtl8139,addr=4,netdev=mynet.0' \
@@ -37,14 +31,26 @@ then
             --events='on_poweroff=destroy,on_reboot=restart,on_crash=destroy' \
             --autoconsole=none
         dom_state='running'
+    elif [[ "$dom_state" = 'running' ]]; then
+        virsh destroy "$vm_name"
+        dom_state='shut off'
     fi
-elif [[ "$dom_state" = 'shut off' ]]
-then
-    virsh start "$vm_name"
-    dom_state='running'
-fi
-
-if [[ "$dom_state" = 'running' ]]
-then
-    virt-viewer --auto-resize=always -r arch-ansible
+    if [[ "$dom_state" = 'shut off' ]]; then
+        virt-install \
+            --reinstall="$vm_name" \
+            --cdrom="$iso_path" \
+            --autoconsole=none
+        dom_state='running'
+    fi
+else
+    if [[ "$dom_state" = 'undefined' ]]; then
+        echo 'vm not installed. specify iso file to install vm.'
+        exit 1
+    elif [[ "$dom_state" = 'shut off' ]]; then
+        virsh start "$vm_name"
+        dom_state='running'
+    fi
+    if [[ "$dom_state" = 'running' ]]; then
+        virt-viewer --auto-resize=always -r arch-ansible
+    fi
 fi
