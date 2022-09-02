@@ -1,21 +1,22 @@
 # vim: ft=yaml.ansible
 ---
 
-- hosts: local
+- name: Install Arch Linux
+  hosts: local
   tasks:
 
-    - name: check if we booted to archiso
+    - name: Check if we booted to archiso
       ansible.builtin.fail:
         msg: not an archiso
       failed_when: ansible_facts.cmdline.archisobasedir is not defined
 
-    - name: check if system is booted in UEFI mode
+    - name: Check if system is booted in UEFI mode
       ansible.builtin.stat:
         path: /sys/firmware/efi/efivars
       register: efivars_result
       failed_when: not (efivars_result.stat.isdir is defined and efivars_result.stat.isdir)
 
-    - name: enable ntp
+    - name: Enable ntp
       ansible.builtin.shell:
         executable: /bin/bash
         cmd: |
@@ -28,19 +29,19 @@
       register: set_ntp_result
       changed_when: '"set-ntp-success" in set_ntp_result.stdout'
 
-    - name: apply mirrorlist
+    - name: Apply mirrorlist
       ansible.builtin.template:
         src: 'mirrorlist.j2'
         dest: '/etc/pacman.d/mirrorlist'
         mode: '644'
 
-    - name: ensure pacman conf.d dir exists
+    - name: Ensure pacman conf.d dir exists
       ansible.builtin.file:
         path: '/etc/pacman.d/conf.d'
         state: directory
         mode: '755'
 
-    - name: apply pacman conf.d
+    - name: Apply pacman conf.d
       ansible.builtin.template:
         src: '{{ item }}'
         dest: '/etc/pacman.d/conf.d/{{ item | splitext | first }}'
@@ -49,16 +50,16 @@
         - 10-options.conf.j2
         - 20-multilib.conf.j2
 
-    - name: include conf.d to pacman.conf
+    - name: Include conf.d to pacman.conf
       ansible.builtin.lineinfile:
         path: '/etc/pacman.conf'
         line: 'Include = /etc/pacman.d/conf.d/*.conf'
 
-    - name: sync package databases
+    - name: Sync package databases
       ansible.builtin.pacman:
         update_cache: true
 
-    - name: pacstrap
+    - name: Pacstrap
       vars:
         packages:
           - base
@@ -88,32 +89,33 @@
           union([archinstall.pacstrap_packages] | flatten | default([])) }}'
         creates: '{{ [archinstall.target, "usr/bin/bash"] | path_join }}'
 
-    - name: generate fstab
+    - name: Generate fstab
       ansible.builtin.shell:
         executable: 'zsh'
         cmd: 'genfstab -U {{ archinstall.target }} >> {{ archinstall.target }}/etc/fstab'
       changed_when: false
 
-- hosts: chroot
+- name: Install Arch Linux in chroot
+  hosts: chroot
   tasks:
-    - name: 'set time zone to {{ archinstall.timezone }}'
+    - name: 'Set time zone to {{ archinstall.timezone }}'
       ansible.builtin.file:
         src: '{{ ["/usr/share/zoneinfo", archinstall.timezone] | path_join }}'
         dest: '/etc/localtime'
         state: link
 
-    - name: adjust clock to hardware clock
+    - name: Adjust clock to hardware clock
       ansible.builtin.command:
         cmd: 'hwclock --systohc'
         creates: '/etc/adjtime'
 
-    - name: set locales
+    - name: Set locales
       ansible.builtin.copy:
         content: "{{ archinstall.locales | default(['en_US.UTF-8 UTF-8']) | join('\n') }}\n"
         dest: '/etc/locale.gen'
         mode: '644'
 
-    - name: set locale lang
+    - name: Set locale lang
       ansible.builtin.lineinfile:
         regexp: '^ *LANG='
         line: "LANG={{ archinstall.locales | default(['en_US.UTF-8 UTF-8']) | first | trim | split | first }}\n"
@@ -121,12 +123,12 @@
         create: true
         mode: '644'
 
-    - name: locale gen
+    - name: Locale gen
       ansible.builtin.command:
         cmd: 'locale-gen'
         creates: '/usr/lib/locale/locale-archive'
 
-    - name: set vconsole keyboard layout
+    - name: Set vconsole keyboard layout
       ansible.builtin.lineinfile:
         regexp: '^ *KEYMAP='
         line: 'KEYMAP={{ archinstall.vconsole.keymap | default("us") }}'
@@ -134,7 +136,7 @@
         create: true
         mode: '644'
 
-    - name: set vconsole font
+    - name: Set vconsole font
       ansible.builtin.lineinfile:
         regexp: '^ *FONT='
         line: 'FONT={{ archinstall.vconsole.font }}'
@@ -143,32 +145,32 @@
         mode: '644'
       when: archinstall.vconsole.font is defined
 
-    - name: define hostname
+    - name: Define hostname
       ansible.builtin.copy:
         content: "{{ archinstall.hostname }}\n"
         dest: '/etc/hostname'
         mode: '644'
 
-    - name: apply hosts
+    - name: Apply hosts
       ansible.builtin.template:
         src: 'hosts.j2'
         dest: '/etc/hosts'
         mode: '644'
 
-    - name: enable periodic trim
+    - name: Enable periodic trim
       ansible.builtin.systemd:
         name: fstrim.timer
         enabled: true
 
-    - name: apply mkinitcpio.conf
+    - name: Apply mkinitcpio.conf
       ansible.builtin.template:
         src: 'mkinitcpio.conf.j2'
         dest: '/etc/mkinitcpio.conf'
         mode: '644'
       notify:
-        - run mkinitcpio
+        - Run mkinitcpio
 
-    - name: zram swap
+    - name: Zram swap
       ansible.builtin.ini_file:
         dest: '/etc/systemd/zram-generator.conf'
         section: 'zram0'
@@ -176,24 +178,24 @@
         mode: '644'
       when: archinstall.swap | default(true)
 
-    - name: zram swap service
+    - name: Zram swap service
       ansible.builtin.systemd:
         name: 'systemd-zram-setup@zram0.service'
         daemon_reload: true
         enabled: true
       when: archinstall.swap | default(true)
 
-    - name: set up grub
+    - name: Set up grub
       when: archinstall.bootloader.grub | default(true)
       block:
-        - name: install grub efi application
+        - name: Install grub efi application
           ansible.builtin.command:
             cmd: 'grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB'
             creates: '/boot/grub/x86_64-efi/'
           notify:
-            - generate grub configuration file
+            - Generate grub configuration file
 
-        - name: create .pacnew backup of grub options
+        - name: Create .pacnew backup of grub options
           ansible.builtin.copy:
             src: '/etc/default/grub'
             dest: '/etc/default/grub.pacnew'
@@ -201,30 +203,30 @@
             remote_src: true
             force: false
 
-        - name: apply grub options
+        - name: Apply grub options
           ansible.builtin.template:
             src: 'templates/grub.j2'
             dest: '/etc/default/grub'
             mode: '644'
           notify:
-            - generate grub configuration file
+            - Generate grub configuration file
 
-    - name: set up systemd-boot
+    - name: Set up systemd-boot
       when: not (archinstall.bootloader.grub | default(true))
       block:
-        - name: install systemd-boot application
+        - name: Install systemd-boot application
           ansible.builtin.command:
             cmd: 'bootctl --path=/boot install'
             creates: '/boot/EFI/systemd/systemd-bootx64.efi'
 
-        - name: add bootloader entries
+        - name: Add bootloader entries
           ansible.builtin.template:
             src: 'templates/loader-entry.conf.j2'
             dest: '/boot/loader/entries/{{ item | kernel_package }}.conf'
             mode: '755'
           loop: '{{ archinstall.kernels | to_kernel_list }}'
 
-        - name: add bootloader fallback entries
+        - name: Add bootloader fallback entries
           ansible.builtin.template:
             src: 'templates/loader-entry.conf.j2'
             dest: '/boot/loader/entries/{{ item | kernel_package }}-fallback.conf'
@@ -233,19 +235,19 @@
             fallback_entry: true
           loop: '{{ archinstall.kernels | to_kernel_list }}'
 
-        - name: bootloader config
+        - name: Bootloader config
           ansible.builtin.template:
             src: 'templates/loader.conf.j2'
             dest: '/boot/loader/loader.conf'
             mode: '755'
 
-    - name: enable networkmanager service
+    - name: Enable networkmanager service
       ansible.builtin.systemd:
         name: 'NetworkManager.service'
         daemon_reload: true
         enabled: true
 
-    - name: add wheel group to sudoers
+    - name: Add wheel group to sudoers
       community.general.sudoers:
         name: wheel
         group: wheel
@@ -253,7 +255,7 @@
         runas: 'ALL:ALL'
         commands: ALL
 
-    - name: add users
+    - name: Add users
       ansible.builtin.user:
         name: '{{ item.name | mandatory }}'
         comment: '{{ item.comment | default(omit) }}'
@@ -267,10 +269,10 @@
 
   handlers:
 
-    - name: run mkinitcpio
+    - name: Run mkinitcpio
       ansible.builtin.command:
         cmd: 'mkinitcpio -P'
 
-    - name: generate grub configuration file
+    - name: Generate grub configuration file
       ansible.builtin.command:
         cmd: 'grub-mkconfig -o /boot/grub/grub.cfg'
