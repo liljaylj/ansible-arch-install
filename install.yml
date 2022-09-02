@@ -40,17 +40,6 @@
         state: directory
         mode: '755'
 
-    - name: import chaotic pacman key
-      community.general.pacman_key:
-        id: 'A3873AB27021C5DD39E0501AFBA220DFC880C036'
-        keyserver: 'keyserver.ubuntu.com'
-
-    - name: install chaotic mirrorlist and keyring
-      ansible.builtin.pacman:
-        name:
-          - 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
-          - 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
-
     - name: apply pacman conf.d
       ansible.builtin.template:
         src: '{{ item }}'
@@ -59,7 +48,6 @@
       with_items:
         - 10-options.conf.j2
         - 20-multilib.conf.j2
-        - 50-chaotic.conf.j2
 
     - name: include conf.d to pacman.conf
       ansible.builtin.lineinfile:
@@ -92,9 +80,6 @@
           - exfat-utils
           - reflector
           - tmux
-          - paru
-          - chaotic-keyring
-          - chaotic-mirrorlist
           - '{{ archinstall.btrfs | default(false) | ternary("btrfs-progs", None) }}'
           - '{{ archinstall.swap | default(true) | ternary("zram-generator", None) }}'
       ansible.builtin.command:
