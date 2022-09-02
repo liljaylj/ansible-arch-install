@@ -2,13 +2,18 @@
 
 set -Eexo pipefail
 
-vm_name='arch-ansible'
-iso_path="$1"
 base_path="$(dirname "$(realpath "$0")")"
-
+cd "$base_path"
 export LIBVIRT_DEFAULT_URI='qemu:///system'
 
-cd "$base_path"
+vm_name='arch-ansible'
+for arg in "$@"; do
+    if [[ "$arg" = '-v' ]]; then
+        virt_viewer=1
+    else
+        iso_path="$arg"
+    fi
+done
 
 dom_state="$( (virsh domstate "$vm_name" 2>/dev/null || printf 'undefined') | xargs)"
 
@@ -50,7 +55,8 @@ else
         virsh start "$vm_name"
         dom_state='running'
     fi
-    if [[ "$dom_state" = 'running' ]]; then
-        virt-viewer --auto-resize=always -r arch-ansible
-    fi
+fi
+
+if [[ -n "$virt_viewer" && "$dom_state" != 'undefined' ]]; then
+    virt-viewer --auto-resize=always -rs arch-ansible
 fi
