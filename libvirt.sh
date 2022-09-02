@@ -22,7 +22,8 @@ if [[ -n "$iso_path" ]]; then
         virt-install \
             --name="$vm_name" \
             --memory=8192 \
-            --vcpus=4 \
+            --vcpus='sockets=1,cores=2,threads=2' \
+            --cpu='host-passthrough,cache.mode=passthrough' \
             --disk='size=50' \
             --cdrom="$iso_path" \
             --filesystem="$base_path,base_path" \
