@@ -26,6 +26,7 @@ if [[ -n "$iso_path" ]]; then
             --cpu='host-passthrough,cache.mode=passthrough' \
             --disk='size=50' \
             --cdrom="$iso_path" \
+            --pm 'suspend_to_disk.enabled=on,suspend_to_mem.enabled=on' \
             --filesystem="$base_path,base_path" \
             --osinfo='detect=on,name=archlinux' \
             --boot=uefi \
