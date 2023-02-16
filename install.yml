@@ -56,7 +56,7 @@
         line: 'Include = /etc/pacman.d/conf.d/*.conf'
 
     - name: Sync package databases
-      ansible.builtin.pacman:
+      community.general.pacman:
         update_cache: true
 
     - name: Pacstrap
@@ -262,7 +262,7 @@
         create_home: '{{ item.create_home | default(true) }}'
         home: '{{ item.home | default(omit) }}'
         groups: '{{ item.groups | default(omit) }}'
-        password: '{{ item.password | mandatory }}'
+        password: '{{ item.password | mandatory | password_hash("sha512", rounds=65536) }}'
         shell: '{{ item.shell | default(omit) }}'
         system: '{{ item.system | default(false) }}'
       loop: '{{ archinstall.users | default([]) }}'
