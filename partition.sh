@@ -20,5 +20,6 @@ btrfs subvol create /mnt/@home
 btrfs subvol create /mnt/@var_log
 btrfs subvol create /mnt/@pkg
 btrfs subvol create /mnt/@libvirt
+btrfs subvol create /mnt/@swap
 
 umount "$mnt_root"
