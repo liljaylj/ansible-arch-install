@@ -4,7 +4,7 @@ disk_dev="${1:-/dev/vda}"
 boot_suffix="${2:-1}"
 btrfs_suffix="${3:-2}"
 mnt_root="${4:-/mnt}"
-btrfs_options='defaults,compress=zstd,noatime'
+btrfs_options='defaults,discard=async,compress-force=zstd,noatime'
 
 mount -o "$btrfs_options,subvol=@" "$disk_dev$btrfs_suffix" "$mnt_root"
 mkdir -p "$mnt_root"/{boot,.snapshots,home,var/log,var/cache/pacman/pkg,var/lib/libvirt/images}
