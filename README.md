@@ -73,12 +73,6 @@ archinstall --script only_hd
 bash partition.sh
 ```
 
-### Find PARTUUID of target disk
-
-```shell
-lsblk -o MOUNTPOINTS,PARTUUID
-```
-
 ### Install arch
 
 ```shell
