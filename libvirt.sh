@@ -15,6 +15,10 @@ for arg in "$@"; do
 	fi
 done
 
+if ! virsh net-list --name | rg -q '^default$'; then
+	virsh net-start --network default
+fi
+
 dom_state="$( (virsh domstate "$vm_name" 2>/dev/null || printf 'undefined') | xargs)"
 
 if [[ -n "$iso_path" ]]; then
