@@ -6,7 +6,7 @@ btrfs_suffix="${3:-2}"
 mnt_root="${4:-/mnt}"
 btrfs_options='defaults,discard=async,compress-force=zstd,noatime'
 
-sgdisk -g -t ef00 -n 1::+512MiB "$disk_dev"
+sgdisk -g -t ef00 -n 1::+1GiB "$disk_dev"
 sgdisk -g -t 8300 -N 2 "$disk_dev"
 
 mkfs.fat -F32 -n LINUXEFI "$disk_dev$boot_suffix"
